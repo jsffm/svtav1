@@ -2,6 +2,10 @@
 
 #set -x
 
+# Trandcoding to av1 with ffmpeg and SVT-AV1
+
+# https://gitlab.com/AOMediaCodec/SVT-AV1
+
 file="$1"
 f1=${file%.*}
 #exit
@@ -81,7 +85,10 @@ av1opt="-i stdin -n $fr -w $w -h $h --fps-num $fn --fps-denom $fd --preset 8 -q 
 ffmpeg -hide_banner $dec -i "$file" -nostdin $dec2 -f rawvideo -pix_fmt yuv420p - 2> "$loge" | SvtAv1EncApp $av1opt 2>&1 | tee "$log"
 #map="-map 0 -map 1:a -map 1:s? -map_chapters 1"
 map="-map 0 -map 1:a -map_chapters 1"
-meta="-metadata:s:v:0 encoder=SVT-AV1"
+vers=$(SvtAv1EncApp --version)
+vers=${vers//' '/_}
+#meta="-metadata:s:v:0 encoder=SVT-AV1"
+meta="-metadata:s:v:0 encoder=$vers"
 ffmpeg -hide_banner -i $v -i "$file" $map -c:v copy -aspect $dar -c:a copy $meta "$o"
 ffprobe -hide_banner "$o" 2>&1 | tee -a "$log"
 
